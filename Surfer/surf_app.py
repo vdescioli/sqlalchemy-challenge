@@ -98,17 +98,22 @@ def temp_observations():
 # and the maximum temperature for a specified start or start-end range
 @app.route("/api/v1.0/<start>")
 def start(start):
-    temp_stats = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
-
-    start_stats = session.query(*temp_stats).filter(Measurement.date >= start).all()
+    # Filter query with start date input, unravel list ,and return JSON
+    start_stats = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs),\
+                                 func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
     start_list = list(np.ravel(start_stats))
     session.close()
     return jsonify(start_list)
     
-    
-
-# @app.route("/api/v1.0/<start>/<end>")
-
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start, end):  
+    # Fitler query with start and end date inputs, unravel list, and return JSON   
+    start_end_stats = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), \
+                                    func.max(Measurement.tobs)).filter(Measurement.date >= start).\
+                                        filter(Measurement.date <= end).all()
+    start_end_list = list(np.ravel(start_end_stats))
+    session.close()
+    return jsonify(start_end_list)
 
 if __name__ == "__main__":
     app.run(debug=True)
